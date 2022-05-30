@@ -19,6 +19,7 @@
         <spring-data.version>2.7.0</spring-data.version>
         <jackson.version>2.13.3</jackson.version>
         <commons-fileupload.version>1.4</commons-fileupload.version>
+        <junit.version>5.8.2</junit.version>
     </properties>
 
 
@@ -82,6 +83,13 @@
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>${commons-fileupload.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
