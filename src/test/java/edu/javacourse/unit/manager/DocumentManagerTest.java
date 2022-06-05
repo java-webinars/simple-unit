@@ -8,6 +8,6 @@ class DocumentManagerTest
     @Test
     void uploadFile() {
         DocumentManager dm = new DocumentManager();
-        dm.uploadFile();
+        dm.uploadFile(null, null, null, true, true);
     }
 }
