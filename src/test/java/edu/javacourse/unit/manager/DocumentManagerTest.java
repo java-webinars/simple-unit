@@ -1,6 +1,5 @@
 package edu.javacourse.unit.manager;
 
-
 import org.junit.jupiter.api.Test;
 
 class DocumentManagerTest
