@@ -1,12 +1,18 @@
 package edu.javacourse.unit.manager;
 
+import edu.javacourse.unit.dao.CompanyRepository;
+import edu.javacourse.unit.dao.DocumentRepository;
 import edu.javacourse.unit.systems.AlfrescoSystem;
+import edu.javacourse.unit.systems.AmazonSystem;
 import edu.javacourse.unit.systems.FileChecker;
+import edu.javacourse.unit.systems.exception.AlfrescoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 class DocumentManagerTest
 {
@@ -31,7 +37,16 @@ class DocumentManagerTest
         FileChecker fileChecker = new FileChecker();
         ReflectionTestUtils.setField(documentManager, "fileChecker", fileChecker);
 
-        AlfrescoSystem alfrescoSystem = new AlfrescoSystem();
+        AlfrescoSystem alfrescoSystem = Mockito.mock(AlfrescoSystem.class);
         ReflectionTestUtils.setField(documentManager, "alfrescoSystem", alfrescoSystem);
+
+        AmazonSystem amazonSystem = Mockito.mock(AmazonSystem.class);
+        ReflectionTestUtils.setField(documentManager, "amazonSystem", amazonSystem);
+
+        CompanyRepository companyDao = Mockito.mock(CompanyRepository.class);
+        ReflectionTestUtils.setField(documentManager, "companyDao", companyDao);
+
+        DocumentRepository documentDao = Mockito.mock(DocumentRepository.class);
+        ReflectionTestUtils.setField(documentManager, "documentDao", documentDao);
     }
 }
