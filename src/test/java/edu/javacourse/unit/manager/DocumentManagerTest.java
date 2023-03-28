@@ -5,19 +5,32 @@ import edu.javacourse.unit.dao.DocumentRepository;
 import edu.javacourse.unit.systems.AlfrescoSystem;
 import edu.javacourse.unit.systems.AmazonSystem;
 import edu.javacourse.unit.systems.FileChecker;
-import edu.javacourse.unit.systems.exception.AlfrescoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
+@ExtendWith(MockitoExtension.class)
 class DocumentManagerTest
 {
     public static final Long COMPANY_ID = 1L;
 
+    @Mock(name = "alfrescoSystem")
+    private AlfrescoSystem alfrescoSystem;
+    @Mock(name = "amazonSystem")
+    private AmazonSystem amazonSystem;
+    @Mock(name = "companyDao")
+    private CompanyRepository companyDao;
+    @Mock(name = "documentDao")
+    private DocumentRepository documentDao;
+
+    @InjectMocks
     private DocumentManager documentManager;
 
     @BeforeEach
@@ -32,21 +45,7 @@ class DocumentManagerTest
     }
 
     private void initDocumentManager() {
-        documentManager = new DocumentManager();
-
         FileChecker fileChecker = new FileChecker();
         ReflectionTestUtils.setField(documentManager, "fileChecker", fileChecker);
-
-        AlfrescoSystem alfrescoSystem = Mockito.mock(AlfrescoSystem.class);
-        ReflectionTestUtils.setField(documentManager, "alfrescoSystem", alfrescoSystem);
-
-        AmazonSystem amazonSystem = Mockito.mock(AmazonSystem.class);
-        ReflectionTestUtils.setField(documentManager, "amazonSystem", amazonSystem);
-
-        CompanyRepository companyDao = Mockito.mock(CompanyRepository.class);
-        ReflectionTestUtils.setField(documentManager, "companyDao", companyDao);
-
-        DocumentRepository documentDao = Mockito.mock(DocumentRepository.class);
-        ReflectionTestUtils.setField(documentManager, "documentDao", documentDao);
     }
 }
