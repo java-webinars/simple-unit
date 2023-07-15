@@ -2,14 +2,18 @@ package edu.javacourse.unit.manager;
 
 import edu.javacourse.unit.dao.CompanyRepository;
 import edu.javacourse.unit.dao.DocumentRepository;
+import edu.javacourse.unit.domain.Document;
 import edu.javacourse.unit.systems.AlfrescoSystem;
 import edu.javacourse.unit.systems.AmazonSystem;
 import edu.javacourse.unit.systems.FileChecker;
 import edu.javacourse.unit.systems.exception.AlfrescoException;
+import edu.javacourse.unit.systems.exception.AmazonException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -24,6 +28,9 @@ import java.io.InputStream;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +47,11 @@ class DocumentManagerTest
     @Mock(name = "documentDao")
     private DocumentRepository documentDao;
 
+    private FileChecker fileChecker;
+
+    @Captor
+    private ArgumentCaptor<Document> docCaptor;
+
     @InjectMocks
     private DocumentManager documentManager;
 
@@ -49,33 +61,30 @@ class DocumentManagerTest
     }
 
     @Test
-    void uploadFile() {
+    void uploadFile() throws AlfrescoException, AmazonException {
         ByteArrayInputStream ba = new ByteArrayInputStream(new byte[20]);
-        documentManager.uploadFile(ba, "test.txt", COMPANY_ID, true, true);
-        documentManager.uploadFile(ba, "simple.txt", COMPANY_ID, true, true);
-        documentManager.uploadFile(ba, "complex.txt", COMPANY_ID, true, true);
+//        ArgumentCaptor<Document> docCaptor = ArgumentCaptor.forClass(Document.class);
 
-        Assertions.assertThrows(RuntimeException.class,
-                () -> documentManager.uploadFile(ba, "exception.txt", COMPANY_ID, true, true));
+        documentManager.uploadFile(ba, "test.txt", COMPANY_ID, true, true);
+
+        verify(fileChecker, times(1)).checkFile(any(), any());
+        verify(alfrescoSystem, times(1)).uploadFile(any(), any());
+        verify(amazonSystem, times(1)).uploadFile(any(), any());
+        verify(alfrescoSystem, times(1)).setPermissions(any());
+        verify(companyDao, times(1)).getReferenceById(eq(COMPANY_ID));
+        verify(documentDao, times(1)).save(any());
+
+        verify(documentDao).save(docCaptor.capture());
+        Document doc = docCaptor.getValue();
+        Assertions.assertEquals("Alfresco12345", doc.getAlfrescoId());
+        Assertions.assertEquals("Amazon12345", doc.getAmazonId());
     }
 
     private void initDocumentManager() throws Exception {
-        FileChecker fileChecker = new FileChecker();
+        fileChecker = Mockito.spy(new FileChecker());
         ReflectionTestUtils.setField(documentManager, "fileChecker", fileChecker);
 
-        when(alfrescoSystem.uploadFile(any(), any())).thenReturn("12345");
-        when(alfrescoSystem.uploadFile(isA(InputStream.class), eq("simple.txt"))).thenReturn("67890");
-        when(alfrescoSystem.uploadFile(isA(InputStream.class), eq("complex.txt")))
-                .thenAnswer(new Answer<String>()
-                {
-                    @Override
-                    public String answer(InvocationOnMock inv) throws Throwable {
-                        String s = inv.getArgument(1, String.class);
-                        return "Hello " + s;
-                    }
-                });
-
-        when(alfrescoSystem.uploadFile(isA(InputStream.class), eq("exception.txt")))
-                .thenThrow(new AlfrescoException("EXCEPTION"));
+        when(alfrescoSystem.uploadFile(any(), any())).thenReturn("Alfresco12345");
+        when(amazonSystem.uploadFile(any(), any())).thenReturn("Amazon12345");
     }
 }
